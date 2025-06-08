@@ -1,0 +1,502 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+/* Navbar Styles */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color:  #e74c3c;
+}
+
+.logo img {
+    height: 40px;
+    margin-left: 10px;
+}
+
+.search-bar-container {
+    position: relative;
+    width: 40%;
+    max-width: 500px;
+}
+
+.search-bar {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    padding-left: 3rem;
+    border: 1px solid #ddd;
+    border-radius: 30px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.search-bar:focus {
+    border-color:  #e74c3c;
+    box-shadow: 0 0 5px rgba(230, 57, 70, 0.3);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 20px;
+    width: 20px;
+}
+
+.nav-container {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color:  #e74c3c;
+}
+
+.menu-icon {
+    display: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* First Section */
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 100vh;
+    height: auto;
+    padding: 0 5%;
+    margin-bottom: 20px;
+    padding-bottom: 2rem;
+}
+
+.ambulance {
+    width: 50%;
+    will-change: transform;
+}
+
+.text-content {
+    width: 45%;
+    text-align: left;
+    color:  #e74c3c;
+    will-change: transform;
+}
+
+.heading {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.subtext {
+    font-size: 18px;
+}
+
+/* Pickup & Drop Input Fields */
+.input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.input-box {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 10px 15px;
+    border-radius: 25px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #eee;
+}
+
+.input-box img {
+    width: 20px;
+    margin-right: 10px;
+}
+
+.input-box input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    flex-grow: 1;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* See Prices Button */
+.see-prices-btn {
+    background-color:  #e74c3c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    margin-top: 20px;
+    margin-left: 180px;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.see-prices-btn:hover {
+    background-color: black;
+}
+
+/* Animation Keyframes */
+@keyframes moveAmbulance {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes slideText {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Desktop Animations */
+@media (min-width: 993px) {
+    .ambulance {
+        transform: translateX(-100%);
+        animation: moveAmbulance 1.5s ease-out forwards;
+    }
+    .text-content {
+        transform: translateX(100%);
+        animation: slideText 1.5s ease-out forwards;
+    }
+}
+
+/* Page 2: Why Choose RapidRescue */
+.why-choose {
+    text-align: center;
+    padding: 60px 5%;
+    background-color: white;
+    padding-top: 40px;
+}
+
+.why-choose h2 {
+    font-size: 32px;
+    color: #222;
+    margin-bottom: 10px;
+}
+
+.why-choose p {
+    font-size: 18px;
+    color: #666;
+}
+
+.why-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 40px;
+}
+
+.features {
+    width: 50%;
+}
+
+.feature-box {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #eee;
+    transition: transform 0.3s;
+}
+
+.feature-box img {
+    width: 60px;
+    margin-right: 15px;
+}
+
+.feature-text {
+    text-align: left;
+}
+
+.feature-text h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: bold;
+    color: #222;
+}
+
+.feature-text p {
+    font-size: 16px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.why-ambulance {
+    width: 45%;
+}
+
+.why-ambulance img {
+    width: 100%;
+    display: block;
+}
+
+/* Hover effects only for devices that support hover */
+@media (hover: hover) and (pointer: fine) {
+    .feature-box:hover {
+        transform: scale(1.05);
+    }
+}
+
+/* Footer */
+.footer {
+    background-color: #222;
+    color: white;
+    text-align: center;
+    padding: 20px 5%;
+    margin-top: 40px;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 10px;
+}
+
+.footer-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s;
+}
+
+.footer-links a:hover {
+    color:  #e74c3c;
+}
+
+.social-icons {
+    margin-top: 10px;
+}
+
+.social-icons img {
+    width: 25px;
+    margin: 0 10px;
+    transition: transform 0.3s;
+}
+
+.social-icons img:hover {
+    transform: scale(1.1);
+}
+
+.social-icons a {
+    display: inline-flex;
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 24px;
+    color: #333;
+    text-decoration: none;
+    margin: 0 8px;
+}
+
+.hospital {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.hospital:last-child {
+    border-bottom: none;
+}
+
+.hospital h2 {
+    margin: 0 0 10px;
+    color:  #e74c3c;
+}
+
+.hospital p {
+    margin: 5px 0;
+}
+
+.hospital a {
+    color: #e74c3c;
+    text-decoration: none;
+}
+
+.hospital a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .container {
+        flex-direction: column;
+        text-align: center;
+        height: auto;
+        padding: 2rem 5%;
+    }
+
+    .ambulance, .text-content {
+        width: 100%;
+        transform: none !important;
+        animation: none !important;
+    }
+
+    .ambulance {
+        margin-bottom: 2rem;
+        order: -1;
+    }
+
+    .why-container {
+        flex-direction: column;
+    }
+
+    .features, .why-ambulance {
+        width: 100%;
+    }
+
+    .why-ambulance {
+        order: -1;
+        margin-bottom: 2rem;
+    }
+
+    .see-prices-btn {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        flex-wrap: wrap;
+        padding: 1rem;
+         position: relative; /* Added for proper menu positioning */
+    }
+
+    .search-bar-container {
+        order: 3;
+        width: 100%;
+        max-width: 100%;
+        margin-top: 1rem;
+    }
+
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .nav-links.show-menu {
+        display: flex;
+    }
+
+    .menu-icon {
+        display: block;
+    }
+
+    .nav-container {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .heading {
+        font-size: 2rem;
+    }
+
+    .feature-box {
+        padding: 15px;
+    }
+
+    .feature-box img {
+        width: 50px;
+        margin-right: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar {
+        padding: 12px 5%;
+    }
+
+    .logo {
+        font-size: 18px;
+    }
+
+    .search-bar-container {
+        width: 100%;
+        min-width: 200px;
+    }
+
+    .search-bar {
+        padding-left: 2.5rem;
+    }
+
+    .heading {
+        font-size: 24px;
+    }
+
+    .subtext {
+        font-size: 16px;
+    }
+
+    .see-prices-btn {
+        font-size: 16px;
+        padding: 8px 16px;
+    }
+
+    .footer-links {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .feature-box {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .feature-box img {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+}

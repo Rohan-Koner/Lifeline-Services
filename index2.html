@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediScan Pathology Labs</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            margin-right: 0.5rem;
+            color: var(--secondary-color);
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            white-space: nowrap;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 1.5rem;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            white-space: nowrap;
+        }
+
+        nav ul li a:hover {
+            color: var(--secondary-color);
+        }
+
+        .hero {
+            background: linear-gradient(rgba(44, 62, 80, 0.8), rgba(44, 62, 80, 0.9)), url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+
+        .search-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .search-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-form input, .search-form select {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 0 0 4px 4px;
+            z-index: 100;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .search-suggestion {
+            padding: 0.8rem;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .search-suggestion:hover {
+            background-color: #f5f5f5;
+        }
+
+        .btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-accent {
+            background-color: var(--accent-color);
+        }
+
+        .btn-accent:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--secondary-color);
+            color: var(--secondary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--dark-color);
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: var(--secondary-color);
+        }
+
+        .labs-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .lab-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .lab-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .lab-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .lab-info {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .lab-name {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        .lab-location {
+            display: flex;
+            align-items: center;
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+        }
+
+        .lab-location i {
+            margin-right: 0.5rem;
+        }
+
+        .lab-specialization {
+            display: inline-block;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .lab-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stars {
+            color: var(--warning-color);
+            margin-right: 0.5rem;
+        }
+
+        .rating-value {
+            font-weight: 600;
+        }
+
+        .lab-price {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+
+        .lab-price::before {
+            content: "₹";
+        }
+
+        .lab-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .map-container {
+            height: 400px;
+            margin: 2rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #labMap {
+            height: 100%;
+            width: 100%;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 800px;
+            width: 90%;
+            position: relative;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: var(--accent-color);
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-lab-name {
+            font-size: 1.8rem;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-lab-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .modal-lab-image {
+            height: 250px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+        }
+
+        .modal-lab-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .services-list {
+            margin: 2rem 0;
+        }
+
+        .services-list h3 {
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--light-color);
+        }
+
+        .service-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .service-name {
+            font-weight: 500;
+        }
+
+        .service-price {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .service-price::before {
+            content: "₹";
+        }
+
+        /* Appointment Modal */
+        .appointment-form {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .appointment-form .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .appointment-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .appointment-form input, 
+        .appointment-form select, 
+        .appointment-form textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .appointment-form .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .confirmation-message {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .confirmation-message i {
+            font-size: 4rem;
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+
+        .confirmation-message h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--success-color);
+        }
+
+        /* Testimonials */
+        .testimonials {
+            background-color: white;
+            padding: 3rem 0;
+            margin: 3rem 0;
+        }
+
+        .testimonials-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .testimonial-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            border-top: 3px solid var(--secondary-color);
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+
+        .testimonial-author img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 1rem;
+        }
+
+        .author-info h4 {
+            margin-bottom: 0.2rem;
+        }
+
+        .author-info p {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+
+        /* Stats */
+        .stats {
+            background: linear-gradient(rgba(44, 62, 80, 0.9), rgba(44, 62, 80, 0.9)), url('https://images.unsplash.com/photo-1581056771107-24ca5f033842?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .stats-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-item h3 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-item p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            text-align: left;
+        }
+
+        .footer-column h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--secondary-color);
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-column ul li a {
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-column ul li a:hover {
+            color: white;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .social-links a:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            color: #bdc3c7;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .hero h2 {
+                font-size: 2.2rem;
+            }
+            
+            .modal-lab-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-lab-image {
+                height: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: row;
+                padding: 1rem;
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+            
+            nav {
+                position: fixed;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background-color: var(--primary-color);
+                padding: 1rem;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+                transform: translateY(-150%);
+                transition: transform 0.3s ease;
+                z-index: 999;
+            }
+            
+            nav.active {
+                transform: translateY(0);
+            }
+            
+            nav ul {
+                flex-direction: column;
+            }
+            
+            nav ul li {
+                margin: 0.5rem 0;
+            }
+            
+            .hero h2 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .search-form {
+                flex-direction: column;
+            }
+            
+            .appointment-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero {
+                padding: 3rem 1rem;
+            }
+            
+            .hero h2 {
+                font-size: 1.8rem;
+            }
+            
+            .search-container {
+                padding: 1rem;
+            }
+            
+            .labs-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .testimonial-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-flask"></i>
+            <h1>MediScan Labs - WB</h1>
+        </div>
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <nav id="mainNav">
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#services-section">Services</a></li>
+                <li><a href="#labs-section">Find a Lab</a></li>
+                <li><a href="#testimonials-section">Testimonials</a></li>
+                <li><a href="#about-section">About Us</a></li>
+                <li><a href="#contact-section">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h2>Find Pathology Labs in West Bengal</h2>
+        <p>Get accurate diagnostic tests from certified labs with transparent pricing and quick results</p>
+        <div class="search-container">
+            <form class="search-form" id="searchForm">
+                <input type="text" id="searchInput" placeholder="Search for tests or labs..." autocomplete="off">
+                <div class="search-suggestions" id="searchSuggestions"></div>
+                <select id="locationSelect">
+                    <option value="">All West Bengal</option>
+                    <option value="kolkata">Kolkata</option>
+                    <option value="durgapur">Durgapur</option>
+                    <option value="asansol">Asansol</option>
+                    <option value="siliguri">Siliguri</option>
+                    <option value="howrah">Howrah</option>
+                    <option value="hooghly">Hooghly</option>
+                    <option value="bardhaman">Bardhaman</option>
+                </select>
+                <select id="specializationSelect">
+                    <option value="">All Specializations</option>
+                    <option value="hematology">Hematology</option>
+                    <option value="microbiology">Microbiology</option>
+                    <option value="biochemistry">Biochemistry</option>
+                    <option value="histopathology">Histopathology</option>
+                    <option value="molecular">Molecular Diagnostics</option>
+                    <option value="immunology">Immunology</option>
+                </select>
+                <button type="submit" class="btn">Search</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="services-section" class="container">
+        <h2 class="section-title">Our Services</h2>
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-vial"></i>
+                </div>
+                <h3>Wide Range of Tests</h3>
+                <p>Over 500+ diagnostic tests including blood tests, urine tests, genetic tests and more.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3>Quick Results</h3>
+                <p>Get most test results within 24-48 hours. Emergency tests available with 6-8 hour turnaround.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <h3>Affordable Pricing</h3>
+                <p>Competitive and transparent pricing with no hidden costs. Discounts for senior citizens.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <h3>Home Collection</h3>
+                <p>Free home sample collection available for all tests. Book online or call to schedule.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="container" id="labs-section">
+        <h2 class="section-title">Find Pathology Labs</h2>
+        <div class="map-container">
+            <div id="labMap"></div>
+        </div>
+
+        <div class="labs-container" id="labsContainer">
+            <!-- Labs will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <section class="testimonials" id="testimonials-section">
+        <div class="testimonials-container">
+            <h2 class="section-title" style="color: white;">What Our Patients Say</h2>
+            <div class="testimonial-cards">
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "The service at MediScan Labs is exceptional. I got my test results within 24 hours and the staff was very professional."
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="Patient">
+                        <div class="author-info">
+                            <h4>Priya Chatterjee</h4>
+                            <p>Kolkata</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "I was very impressed with the home collection service. The technician arrived on time and was very careful during the blood draw."
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Patient">
+                        <div class="author-info">
+                            <h4>Rajesh Mondal</h4>
+                            <p>Durgapur</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "Accurate results and affordable prices. I've been using MediScan for all my family's diagnostic needs for years."
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Patient">
+                        <div class="author-info">
+                            <h4>Ananya Das</h4>
+                            <p>Siliguri</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats">
+        <div class="stats-container">
+            <div class="stat-item">
+                <h3>50+</h3>
+                <p>Labs Across WB</p>
+            </div>
+            <div class="stat-item">
+                <h3>500+</h3>
+                <p>Diagnostic Tests</p>
+            </div>
+            <div class="stat-item">
+                <h3>1M+</h3>
+                <p>Tests Per Year</p>
+            </div>
+            <div class="stat-item">
+                <h3>98%</h3>
+                <p>Customer Satisfaction</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lab Details Modal -->
+    <div class="modal" id="labModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div class="modal-header">
+                <h2 class="modal-lab-name" id="modalLabName">Advanced Diagnostic Center</h2>
+                <div class="lab-rating">
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <span class="rating-value">4.5 (128 reviews)</span>
+                </div>
+            </div>
+            <div class="modal-lab-details">
+                <div class="modal-lab-image" id="modalLabImage" style="background-image: url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                <div class="modal-lab-info">
+                    <div>
+                        <div class="lab-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="modalLabLocation">123 Medical Drive, Kolkata</span>
+                        </div>
+                        <div class="lab-specialization" id="modalLabSpecialization">Hematology, Biochemistry</div>
+                        <p id="modalLabDescription">Our state-of-the-art facility offers comprehensive diagnostic services with quick turnaround times. NABL accredited, we provide accurate results you can trust.</p>
+                    </div>
+                    <div>
+                        <div class="lab-price" id="modalLabPrice">Starting from ₹499</div>
+                        <button class="btn btn-accent" id="bookNowBtn">Book Appointment</button>
+                    </div>
+                </div>
+            </div>
+            <div class="services-list" id="servicesList">
+                <h3>Available Tests</h3>
+                <!-- Services will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Modal -->
+    <div class="modal" id="appointmentModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeAppointmentModal()">&times;</span>
+            <div id="appointmentFormContainer">
+                <div class="modal-header">
+                    <h2 class="modal-lab-name" id="appointmentLabName">Book Appointment</h2>
+                </div>
+                <form id="appointmentForm" class="appointment-form">
+                    <input type="hidden" id="appointmentLabId">
+                    <div class="form-group full-width">
+                        <label for="appointmentTest">Select Test</label>
+                        <select id="appointmentTest" required>
+                            <option value="">Select a test</option>
+                            <!-- Tests will be dynamically inserted -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="patientName">Full Name</label>
+                        <input type="text" id="patientName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="patientEmail">Email</label>
+                        <input type="email" id="patientEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="patientPhone">Phone Number</label>
+                        <input type="tel" id="patientPhone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentDate">Preferred Date</label>
+                        <input type="date" id="appointmentDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentTime">Preferred Time</label>
+                        <select id="appointmentTime" required>
+                            <option value="">Select time</option>
+                            <option value="morning">Morning (8AM-12PM)</option>
+                            <option value="afternoon">Afternoon (12PM-4PM)</option>
+                            <option value="evening">Evening (4PM-8PM)</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="patientAddress">Address (for home collection)</label>
+                        <textarea id="patientAddress" rows="3"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>
+                            <input type="checkbox" id="homeCollection"> Request home sample collection
+                        </label>
+                    </div>
+                    <div class="form-group full-width">
+                        <button type="submit" class="btn btn-accent">Confirm Appointment</button>
+                    </div>
+                </form>
+            </div>
+            <div id="appointmentConfirmation" style="display: none;">
+                <div class="confirmation-message">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>Appointment Booked Successfully!</h3>
+                    <p id="confirmationDetails">Your appointment has been confirmed. We've sent the details to your email.</p>
+                    <button class="btn" onclick="closeAppointmentModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section id="about-section" class="container">
+        <h2 class="section-title">About MediScan Labs</h2>
+        <div style="text-align: center; max-width: 800px; margin: 0 auto;">
+            <p>MediScan Pathology Labs is West Bengal's leading diagnostic service provider with a network of NABL accredited laboratories across the state. Founded in 2010, we have been committed to providing accurate, affordable, and timely diagnostic services to millions of patients.</p>
+            <p>Our team of over 200 pathologists and 500+ technicians work round the clock to deliver reliable test results. We invest in the latest diagnostic technology and follow strict quality control measures to ensure the highest standards of testing.</p>
+            <button class="btn btn-outline" style="margin-top: 1rem;">Learn More About Us</button>
+        </div>
+    </section>
+
+    <footer id="contact-section">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>About MediScan</h3>
+                <p>Connecting patients with trusted pathology labs across West Bengal since 2010. Our network includes certified laboratories throughout the state.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#services-section">Services</a></li>
+                    <li><a href="#labs-section">Find a Lab</a></li>
+                    <li><a href="#testimonials-section">Testimonials</a></li>
+                    <li><a href="#about-section">About Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Popular Tests</h3>
+                <ul>
+                    <li><a href="#">Complete Blood Count (CBC)</a></li>
+                    <li><a href="#">Thyroid Profile</a></li>
+                    <li><a href="#">Liver Function Test</a></li>
+                    <li><a href="#">Kidney Function Test</a></li>
+                    <li><a href="#">Diabetes Screening</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Contact Us</h3>
+                <ul>
+                    <li><i class="fas fa-phone"></i> (033) 1234-5678</li>
+                    <li><i class="fas fa-envelope"></i> info@mediscanwb.com</li>
+                    <li><i class="fas fa-map-marker-alt"></i> 100 Health Plaza, Suite 200, Kolkata, WB</li>
+                    <li><i class="fas fa-clock"></i> Mon-Sat: 7AM-9PM, Sun: 7AM-2PM</li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+                        <p>&copy; 2023 MediScan Pathology Labs - West Bengal. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const mainNav = document.getElementById('mainNav');
+        
+        menuToggle.addEventListener('click', () => {
+            mainNav.classList.toggle('active');
+        });
+        
+        // Close mobile menu when clicking on a link
+        const navLinks = document.querySelectorAll('nav ul li a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mainNav.classList.remove('active');
+            });
+        });
+        
+        // Sample lab data
+        const labs = [
+            {
+                id: 1,
+                name: "Advanced Diagnostic Center",
+                location: "Kolkata, Salt Lake",
+                specialization: "Hematology, Biochemistry",
+                rating: 4.5,
+                reviews: 128,
+                price: 499,
+                image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                description: "Our state-of-the-art facility offers comprehensive diagnostic services with quick turnaround times. NABL accredited, we provide accurate results you can trust.",
+                coordinates: [22.5726, 88.3639],
+                tests: [
+                    { name: "Complete Blood Count (CBC)", price: 350 },
+                    { name: "Thyroid Profile (T3, T4, TSH)", price: 600 },
+                    { name: "Liver Function Test", price: 800 },
+                    { name: "Kidney Function Test", price: 750 },
+                    { name: "Lipid Profile", price: 900 },
+                    { name: "HbA1c (Glycated Hemoglobin)", price: 500 },
+                    { name: "Vitamin D Test", price: 1200 }
+                ]
+            },
+            {
+                id: 2,
+                name: "City Pathology Lab",
+                location: "Kolkata, Park Street",
+                specialization: "Microbiology, Immunology",
+                rating: 4.2,
+                reviews: 95,
+                price: 399,
+                image: "https://images.unsplash.com/photo-1579684453423-f84349ef60b0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                description: "A trusted name in diagnostic services for over 15 years, offering specialized tests with quick results and home collection services.",
+                coordinates: [22.5516, 88.3515],
+                tests: [
+                    { name: "Complete Blood Count (CBC)", price: 320 },
+                    { name: "Thyroid Profile (T3, T4, TSH)", price: 550 },
+                    { name: "Urine Routine Examination", price: 200 },
+                    { name: "Blood Sugar Fasting", price: 120 },
+                    { name: "Blood Sugar Post Prandial", price: 120 },
+                    { name: "HIV Screening", price: 400 },
+                    { name: "Hepatitis B Surface Antigen", price: 350 }
+                ]
+            },
+            {
+                id: 3,
+                name: "Durgapur Medical Diagnostics",
+                location: "Durgapur, City Center",
+                specialization: "Histopathology, Molecular",
+                rating: 4.0,
+                reviews: 64,
+                price: 449,
+                image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                description: "Serving Durgapur and surrounding areas with advanced diagnostic facilities and expert pathologists for accurate test results.",
+                coordinates: [23.5204, 87.3119],
+                tests: [
+                    { name: "Complete Blood Count (CBC)", price: 330 },
+                    { name: "Thyroid Profile (T3, T4, TSH)", price: 580 },
+                    { name: "Liver Function Test", price: 750 },
+                    { name: "Kidney Function Test", price: 700 },
+                    { name: "Lipid Profile", price: 850 },
+                    { name: "CRP (C-Reactive Protein)", price: 600 },
+                    { name: "Serum Electrolytes", price: 500 }
+                ]
+            },
+            {
+                id: 4,
+                name: "Siliguri Health Labs",
+                location: "Siliguri, Sevoke Road",
+                specialization: "Biochemistry, Hematology",
+                rating: 4.3,
+                reviews: 87,
+                price: 549,
+                image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                description: "Northern Bengal's premier diagnostic center with cutting-edge technology and highly qualified staff for all your testing needs.",
+                coordinates: [26.7271, 88.3953],
+                tests: [
+                    { name: "Complete Blood Count (CBC)", price: 360 },
+                    { name: "Thyroid Profile (T3, T4, TSH)", price: 620 },
+                    { name: "Liver Function Test", price: 820 },
+                    { name: "Kidney Function Test", price: 780 },
+                    { name: "Lipid Profile", price: 950 },
+                    { name: "Vitamin B12 Test", price: 1100 },
+                    { name: "PSA (Prostate Specific Antigen)", price: 900 }
+                ]
+            },
+            {
+                id: 5,
+                name: "Asansol Diagnostic Center",
+                location: "Asansol, Burnpur",
+                specialization: "Immunology, Microbiology",
+                rating: 3.9,
+                reviews: 42,
+                price: 399,
+                image: "https://images.unsplash.com/photo-1579684453423-f84349ef60b0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                description: "Providing quality diagnostic services to Asansol region with affordable pricing and reliable test results.",
+                coordinates: [23.6739, 86.9524],
+                tests: [
+                    { name: "Complete Blood Count (CBC)", price: 310 },
+                    { name: "Thyroid Profile (T3, T4, TSH)", price: 540 },
+                    { name: "Urine Routine Examination", price: 180 },
+                    { name: "Blood Sugar Fasting", price: 100 },
+                    { name: "Blood Sugar Post Prandial", price: 100 },
+                    { name: "Malaria Antigen Test", price: 300 },
+                    { name: "Dengue NS1 Antigen", price: 450 }
+                ]
+            },
+            {
+                id: 6,
+                name: "Hooghly Pathology Lab",
+                location: "Chinsurah, Hooghly",
+                specialization: "Hematology, Biochemistry",
+                rating: 4.1,
+                reviews: 53,
+                price: 429,
+                image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                description: "Serving Hooghly district with accurate diagnostic services and compassionate care for all patients.",
+                coordinates: [22.8952, 88.3870],
+                tests: [
+                    { name: "Complete Blood Count (CBC)", price: 340 },
+                    { name: "Thyroid Profile (T3, T4, TSH)", price: 570 },
+                    { name: "Liver Function Test", price: 770 },
+                    { name: "Kidney Function Test", price: 720 },
+                    { name: "Lipid Profile", price: 880 },
+                    { name: "RA Factor Test", price: 550 },
+                    { name: "Serum Creatinine", price: 250 }
+                ]
+            }
+        ];
+        
+        // Sample test data for search suggestions
+        const tests = [
+            "Complete Blood Count (CBC)",
+            "Thyroid Profile (T3, T4, TSH)",
+            "Liver Function Test",
+            "Kidney Function Test",
+            "Lipid Profile",
+            "Blood Sugar Fasting",
+            "Blood Sugar Post Prandial",
+            "HbA1c (Glycated Hemoglobin)",
+            "Urine Routine Examination",
+            "Vitamin D Test",
+            "Vitamin B12 Test",
+            "CRP (C-Reactive Protein)",
+            "Serum Electrolytes",
+            "HIV Screening",
+            "Hepatitis B Surface Antigen",
+            "Malaria Antigen Test",
+            "Dengue NS1 Antigen",
+            "PSA (Prostate Specific Antigen)",
+            "RA Factor Test",
+            "Serum Creatinine"
+        ];
+        
+        // Initialize map
+        const map = L.map('labMap').setView([22.9868, 87.8550], 7);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Add markers for labs
+        labs.forEach(lab => {
+            const marker = L.marker(lab.coordinates).addTo(map);
+            marker.bindPopup(`<b>${lab.name}</b><br>${lab.location}<br>Rating: ${lab.rating}★`);
+            
+            marker.on('click', () => {
+                openLabModal(lab);
+            });
+        });
+        
+        // Display labs in the container
+        const labsContainer = document.getElementById('labsContainer');
+        
+        function displayLabs(filteredLabs = labs) {
+            labsContainer.innerHTML = '';
+            
+            filteredLabs.forEach(lab => {
+                const labCard = document.createElement('div');
+                labCard.className = 'lab-card';
+                labCard.innerHTML = `
+                    <div class="lab-image" style="background-image: url('${lab.image}')"></div>
+                    <div class="lab-info">
+                        <h3 class="lab-name">${lab.name}</h3>
+                        <div class="lab-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>${lab.location}</span>
+                        </div>
+                        <span class="lab-specialization">${lab.specialization}</span>
+                        <div class="lab-rating">
+                            <div class="stars">
+                                ${generateStars(lab.rating)}
+                            </div>
+                            <span class="rating-value">${lab.rating} (${lab.reviews} reviews)</span>
+                        </div>
+                        <div class="lab-price">Starting from ₹${lab.price}</div>
+                        <div class="lab-actions">
+                            <button class="btn btn-sm btn-outline view-details" data-id="${lab.id}">View Details</button>
+                            <button class="btn btn-sm book-now" data-id="${lab.id}">Book Now</button>
+                        </div>
+                    </div>
+                `;
+                
+                labsContainer.appendChild(labCard);
+            });
+            
+            // Add event listeners to the buttons
+            document.querySelectorAll('.view-details').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const labId = parseInt(e.target.getAttribute('data-id'));
+                    const lab = labs.find(l => l.id === labId);
+                    openLabModal(lab);
+                });
+            });
+            
+            document.querySelectorAll('.book-now').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const labId = parseInt(e.target.getAttribute('data-id'));
+                    const lab = labs.find(l => l.id === labId);
+                    openAppointmentModal(lab);
+                });
+            });
+        }
+        
+        function generateStars(rating) {
+            let stars = '';
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            
+            for (let i = 0; i < fullStars; i++) {
+                stars += '<i class="fas fa-star"></i>';
+            }
+            
+            if (hasHalfStar) {
+                stars += '<i class="fas fa-star-half-alt"></i>';
+            }
+            
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+            for (let i = 0; i < emptyStars; i++) {
+                stars += '<i class="far fa-star"></i>';
+            }
+            
+            return stars;
+        }
+        
+        // Search functionality
+        const searchForm = document.getElementById('searchForm');
+        const searchInput = document.getElementById('searchInput');
+        const searchSuggestions = document.getElementById('searchSuggestions');
+        const locationSelect = document.getElementById('locationSelect');
+        const specializationSelect = document.getElementById('specializationSelect');
+        
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.toLowerCase();
+            
+            if (query.length < 2) {
+                searchSuggestions.style.display = 'none';
+                return;
+            }
+            
+            const filteredTests = tests.filter(test => 
+                test.toLowerCase().includes(query)
+            );
+            
+            if (filteredTests.length > 0) {
+                searchSuggestions.innerHTML = '';
+                filteredTests.forEach(test => {
+                    const suggestion = document.createElement('div');
+                    suggestion.className = 'search-suggestion';
+                    suggestion.textContent = test;
+                    suggestion.addEventListener('click', () => {
+                        searchInput.value = test;
+                        searchSuggestions.style.display = 'none';
+                        searchForm.dispatchEvent(new Event('submit'));
+                    });
+                    searchSuggestions.appendChild(suggestion);
+                });
+                searchSuggestions.style.display = 'block';
+            } else {
+                searchSuggestions.style.display = 'none';
+            }
+        });
+        
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            searchSuggestions.style.display = 'none';
+            
+            const query = searchInput.value.toLowerCase();
+            const location = locationSelect.value;
+            const specialization = specializationSelect.value;
+            
+            let filteredLabs = labs;
+            
+            if (query) {
+                filteredLabs = filteredLabs.filter(lab => 
+                    lab.name.toLowerCase().includes(query) || 
+                    lab.tests.some(test => test.name.toLowerCase().includes(query))
+                );
+            }
+            
+            if (location) {
+                filteredLabs = filteredLabs.filter(lab => 
+                    lab.location.toLowerCase().includes(location)
+                );
+            }
+            
+            if (specialization) {
+                filteredLabs = filteredLabs.filter(lab => 
+                    lab.specialization.toLowerCase().includes(specialization)
+                );
+            }
+            
+            displayLabs(filteredLabs);
+            
+            // Update map markers
+            map.eachLayer(layer => {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+            
+            filteredLabs.forEach(lab => {
+                const marker = L.marker(lab.coordinates).addTo(map);
+                marker.bindPopup(`<b>${lab.name}</b><br>${lab.location}<br>Rating: ${lab.rating}★`);
+                
+                marker.on('click', () => {
+                    openLabModal(lab);
+                });
+            });
+            
+            if (filteredLabs.length > 0) {
+                const firstLab = filteredLabs[0];
+                map.setView(firstLab.coordinates, 12);
+            } else {
+                map.setView([22.9868, 87.8550], 7);
+            }
+        });
+        
+        // Modal functionality
+        const labModal = document.getElementById('labModal');
+        const appointmentModal = document.getElementById('appointmentModal');
+        
+        function openLabModal(lab) {
+            document.getElementById('modalLabName').textContent = lab.name;
+            document.getElementById('modalLabLocation').textContent = lab.location;
+            document.getElementById('modalLabSpecialization').textContent = lab.specialization;
+            document.getElementById('modalLabDescription').textContent = lab.description;
+            document.getElementById('modalLabPrice').textContent = `Starting from ₹${lab.price}`;
+            document.getElementById('modalLabImage').style.backgroundImage = `url('${lab.image}')`;
+            
+            // Update rating
+            const starsContainer = document.querySelector('#labModal .stars');
+            starsContainer.innerHTML = generateStars(lab.rating);
+            document.querySelector('#labModal .rating-value').textContent = `${lab.rating} (${lab.reviews} reviews)`;
+            
+            // Update services list
+            const servicesList = document.getElementById('servicesList');
+            servicesList.innerHTML = '<h3>Available Tests</h3>';
+            
+            lab.tests.forEach(test => {
+                const serviceItem = document.createElement('div');
+                serviceItem.className = 'service-item';
+                serviceItem.innerHTML = `
+                    <div class="service-name">${test.name}</div>
+                    <div class="service-price">${test.price}</div>
+                `;
+                servicesList.appendChild(serviceItem);
+            });
+            
+            // Update book now button
+            const bookNowBtn = document.getElementById('bookNowBtn');
+            bookNowBtn.onclick = () => {
+                closeModal();
+                openAppointmentModal(lab);
+            };
+            
+            labModal.style.display = 'block';
+        }
+        
+        function openAppointmentModal(lab) {
+            document.getElementById('appointmentLabName').textContent = `Book Appointment - ${lab.name}`;
+            document.getElementById('appointmentLabId').value = lab.id;
+            
+            // Update tests dropdown
+            const testSelect = document.getElementById('appointmentTest');
+            testSelect.innerHTML = '<option value="">Select a test</option>';
+            
+            lab.tests.forEach(test => {
+                const option = document.createElement('option');
+                option.value = test.name;
+                option.textContent = `${test.name} (₹${test.price})`;
+                testSelect.appendChild(option);
+            });
+            
+            // Reset form and show form (hide confirmation)
+            document.getElementById('appointmentForm').reset();
+            document.getElementById('appointmentFormContainer').style.display = 'block';
+            document.getElementById('appointmentConfirmation').style.display = 'none';
+            
+            appointmentModal.style.display = 'block';
+        }
+        
+        function closeModal() {
+            labModal.style.display = 'none';
+        }
+        
+        function closeAppointmentModal() {
+            appointmentModal.style.display = 'none';
+        }
+        
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === labModal) {
+                closeModal();
+            }
+            if (e.target === appointmentModal) {
+                closeAppointmentModal();
+            }
+        });
+        
+        // Handle appointment form submission
+        const appointmentForm = document.getElementById('appointmentForm');
+        appointmentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // In a real app, you would send this data to a server
+            const labId = document.getElementById('appointmentLabId').value;
+            const test = document.getElementById('appointmentTest').value;
+            const name = document.getElementById('patientName').value;
+            const email = document.getElementById('patientEmail').value;
+            const phone = document.getElementById('patientPhone').value;
+            const date = document.getElementById('appointmentDate').value;
+            const time = document.getElementById('appointmentTime').value;
+            const address = document.getElementById('patientAddress').value;
+            const homeCollection = document.getElementById('homeCollection').checked;
+            
+            const lab = labs.find(l => l.id === parseInt(labId));
+            
+            // Show confirmation
+            document.getElementById('appointmentFormContainer').style.display = 'none';
+            document.getElementById('appointmentConfirmation').style.display = 'block';
+            
+            const confirmationDetails = document.getElementById('confirmationDetails');
+            confirmationDetails.innerHTML = `
+                <p><strong>Lab:</strong> ${lab.name}</p>
+                <p><strong>Test:</strong> ${test}</p>
+                <p><strong>Date:</strong> ${date} (${time})</p>
+                ${homeCollection ? `<p><strong>Address:</strong> ${address}</p>` : '<p>Please visit the lab at your scheduled time.</p>'}
+                <p>We've sent the details to ${email} and SMS to ${phone}.</p>
+            `;
+        });
+        
+        // Initialize the page
+        displayLabs();
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You | RapidRescue</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .thank-you-container {
+            text-align: center;
+            padding: 80px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .thank-you-icon {
+            font-size: 80px;
+            color: #e74c3c;
+            margin-bottom: 30px;
+        }
+        
+        .thank-you-title {
+            font-size: 36px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .thank-you-message {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #34495e;
+        }
+        
+        .thank-you-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: 500;
+        }
+        
+        .thank-you-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        @media (max-width: 768px) {
+            .thank-you-title {
+                font-size: 28px;
+            }
+            
+            .thank-you-message {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="logo">RapidRescue<img src="logo[1].png" alt="Logo"></div>
+        <div class="search-bar-container">
+            <!-- <input type="text" class="search-bar" id="hospital-search" placeholder="Search nearby Hospitals"> -->
+            <!-- <img src="https://cdn-icons-png.flaticon.com/128/17216/17216943.png" alt="Search Icon" class="search-icon">
+            <div class="search-results" id="search-results"></div> -->
+        </div>
+        <div class="nav-container">
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="BOOK.html">Book</a>
+                <a href="Ride.html">Drivers Details</a>
+                <a href="aboutus.html">About Us</a>
+            </div>
+        </div>
+        <div class="menu-icon" onclick="toggleMenu()">☰</div>
+    </div>
+
+    <!-- Thank You Content -->
+    <div class="thank-you-container">
+        <div class="thank-you-icon">
+            <i class="ri-checkbox-circle-fill"></i>
+        </div>
+        <h1 class="thank-you-title">Thank You for Choosing RapidRescue!</h1>
+        <p class="thank-you-message">
+            Your ambulance request has been received and is being processed. Our team is coordinating with the nearest available ambulance to reach you as quickly as possible. You will receive a confirmation call shortly with details about your ambulance and estimated arrival time.
+        </p>
+        <p class="thank-you-message">
+            In case of emergency, please call our 24/7 helpline: <strong>+91-9876543210</strong>
+        </p>
+        <button class="thank-you-btn" onclick="location.href='index.html'">Back to Home</button>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-links">
+            <a href="aboutus.html">About Us</a>
+            <a href="#">Services</a>
+            <a href="#">Contact</a>
+            <a href="#">Privacy Policy</a>
+        </div>
+        <div class="social-icons">
+            <a href="#"><i class="ri-google-fill"></i></a>
+            <a href="#"><i class="ri-facebook-fill"></i></a>
+            <a href="#"><i class="ri-github-fill"></i></a>
+            <a href="#"><i class="ri-linkedin-fill"></i></a>
+        </div>
+        <p>© 2025 RapidRescue. All rights reserved.</p>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            document.querySelector(".nav-links").classList.toggle("show-menu");
+        }
+
+        // Hospital search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('hospital-search');
+            const searchResults = document.getElementById('search-results');
+            
+            // List of hospitals with their websites
+            const hospitals = [
+                { name: "Apollo Gleneagles Hospitals", website: "https://www.apollohospitals.com" },
+                { name: "Fortis Hospital, Anandapur", website: "https://www.fortishealthcare.com" },
+                { name: "AMRI Hospitals, Salt Lake", website: "https://www.amrihospitals.in" },
+                { name: "Peerless Hospital", website: "https://www.peerlesshospital.com" },
+                { name: "Medica Superspecialty Hospital", website: "https://www.medicahospitals.in" },
+                { name: "Woodlands Multispeciality Hospital", website: "https://www.woodlandshospital.in" }
+            ];
+
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                searchResults.innerHTML = '';
+                
+                if (searchTerm.length > 2) {
+                    const filteredHospitals = hospitals.filter(hospital => 
+                        hospital.name.toLowerCase().includes(searchTerm)
+                    );
+                    
+                    if (filteredHospitals.length > 0) {
+                        filteredHospitals.forEach(hospital => {
+                            const resultItem = document.createElement('div');
+                            resultItem.className = 'search-result-item';
+                            resultItem.textContent = hospital.name;
+                            resultItem.addEventListener('click', function() {
+                                window.open(hospital.website, '_blank');
+                            });
+                            searchResults.appendChild(resultItem);
+                        });
+                        searchResults.style.display = 'block';
+                    } else {
+                        const noResult = document.createElement('div');
+                        noResult.className = 'search-result-item';
+                        noResult.textContent = 'No hospitals found';
+                        searchResults.appendChild(noResult);
+                        searchResults.style.display = 'block';
+                    }
+                } else {
+                    searchResults.style.display = 'none';
+                }
+            });
+
+            // Close search results when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
